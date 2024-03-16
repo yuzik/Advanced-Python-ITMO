@@ -1,0 +1,4 @@
+.pypirc
+latex_generator/__pycache__
+latex_generator.egg-info
+latex_generator_itmo_yuzik.egg-info
