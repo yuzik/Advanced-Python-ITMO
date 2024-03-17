@@ -5,7 +5,7 @@ class SimpleMatrix:
     def __init__(self, data):
         self.data = np.array(data)
 
-    # Сложение матриц
+    # Сложение
     def add(self, other_matrix):
         if self.data.shape != other_matrix.data.shape:
             print("Ошибка: размеры матриц не совпадают!")
@@ -13,7 +13,7 @@ class SimpleMatrix:
         result = self.data + other_matrix.data
         return SimpleMatrix(result)
 
-    # Покомпонентное умножение
+    # Умножение – покомпонентное
     def multiply(self, other_matrix):
         if self.data.shape != other_matrix.data.shape:
             print("Ошибка: размеры матриц не совпадают!")
@@ -21,7 +21,7 @@ class SimpleMatrix:
         result = self.data * other_matrix.data
         return SimpleMatrix(result)
 
-    # Матричное умножение
+    # Умножение – Матричное
     def dot(self, other_matrix):
         if self.data.shape[1] != other_matrix.data.shape[0]:
             print("Ошибка: размеры матриц не подходят для матричного умножения!")
@@ -30,19 +30,19 @@ class SimpleMatrix:
         return SimpleMatrix(result)
 
 
-# Установка seed для воспроизводимости
+# Уseed для воспроизводимости
 np.random.seed(0)
 
-# Генерация двух матриц
+# Генерация
 matrix_a = SimpleMatrix(np.random.randint(0, 10, (10, 10)))
 matrix_b = SimpleMatrix(np.random.randint(0, 10, (10, 10)))
 
-# Выполнение операций
+# Выполнение
 added_matrix = matrix_a.add(matrix_b)
 multiplied_matrix = matrix_a.multiply(matrix_b)
 dotted_matrix = matrix_a.dot(matrix_b)
 
-# Сохранение результатов в файлы
+# Сохранение
 with open("artifacts/matrix+.txt", "w") as f:
     f.write(np.array2string(added_matrix.data))
 

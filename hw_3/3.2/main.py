@@ -1,6 +1,6 @@
 import numpy as np
 
-# Примесь для арифметических операций
+# Aрифметические операций
 
 
 class ArithmeticMixin:
@@ -22,7 +22,7 @@ class ArithmeticMixin:
     def __truediv__(self, other):
         return SimpleMatrix(self.data / other.data)
 
-# Примесь для ввода-вывода
+# Ввод-вывод
 
 
 class IOMixin:
@@ -36,14 +36,14 @@ class IOMixin:
             data = np.loadtxt(f)
         return SimpleMatrix(data)
 
-# Примесь для красивого отображения
+# отображение
 
 
 class DisplayMixin:
     def __str__(self):
         return np.array2string(self.data)
 
-# Примесь для getter и setter
+# getter и setter
 
 
 class AccessorMixin:
@@ -55,7 +55,7 @@ class AccessorMixin:
     def data(self, value):
         self._data = np.array(value)
 
-# Основной класс, использующий все примеси
+# Основной класс, все примеси
 
 
 class SimpleMatrix(ArithmeticMixin, IOMixin, DisplayMixin, AccessorMixin):
@@ -63,7 +63,7 @@ class SimpleMatrix(ArithmeticMixin, IOMixin, DisplayMixin, AccessorMixin):
         self.data = data  # Используется setter из AccessorMixin
 
 
-# Генерация матриц и выполнение операций
+# Генерация и выполнение
 np.random.seed(0)
 matrix1 = SimpleMatrix(np.random.randint(0, 10, (10, 10)))
 matrix2 = SimpleMatrix(np.random.randint(0, 10, (10, 10)))
@@ -72,7 +72,7 @@ added_matrix = matrix1 + matrix2
 multiplied_matrix = matrix1 * matrix2
 dotted_matrix = matrix1 @ matrix2
 
-# Сохранение результатов в файлы
+# Сохранение
 added_matrix.save("artifacts/matrix+.txt")
 multiplied_matrix.save("artifacts//matrix*.txt")
 dotted_matrix.save("artifacts//matrix@.txt")
