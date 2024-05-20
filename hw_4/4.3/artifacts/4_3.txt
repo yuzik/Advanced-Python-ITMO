@@ -1,15 +1,29 @@
-[2024-03-31 17:35:41] Отправлено: Task-1
-[2024-03-31 17:35:46] Получено: gnfx-1
-[2024-03-31 17:35:46] Отправлено: Task-2
-[2024-03-31 17:35:51] Получено: gnfx-2
-[2024-03-31 17:36:00] Отправлено: TTask-Task-3
-[2024-03-31 17:36:05] Получено: ggnfx-gnfx-3
-[2024-03-31 17:36:22] Отправлено: Task-4
-[2024-03-31 17:36:27] Получено: gnfx-4
-[2024-03-31 17:36:27] Отправлено: Task-5
-[2024-03-31 17:36:32] Получено: gnfx-5
-[2024-03-31 17:36:32] Отправлено: Task-6
-[2024-03-31 17:36:37] Получено: gnfx-6
-[2024-03-31 17:36:37] Отправлено: Task-7
-[2024-03-31 17:36:42] Получено: gnfx-7
-[2024-03-31 17:36:54] Отправлено: exit
+Interaction Log
+================
+2024-05-20 14:00:35 - Main Process sent: TASK1
+2024-05-20 14:00:35 - Process A received: TASK1
+2024-05-20 14:00:40 - Process A processed and sent: task1
+2024-05-20 14:00:40 - Process B received: task1
+2024-05-20 14:00:40 - Process B processed and sent: gnfx1
+2024-05-20 14:00:40 - Main Process received: gnfx1
+2024-05-20 14:00:45 - Main Process sent: TASK2
+2024-05-20 14:00:45 - Process A received: TASK2
+2024-05-20 14:00:50 - Process A processed and sent: task2
+2024-05-20 14:00:50 - Process B received: task2
+2024-05-20 14:00:50 - Process B processed and sent: gnfx2
+2024-05-20 14:00:50 - Main Process received: gnfx2
+2024-05-20 14:00:53 - Main Process sent: TASK3
+2024-05-20 14:00:53 - Process A received: TASK3
+2024-05-20 14:00:58 - Process A processed and sent: task3
+2024-05-20 14:00:58 - Process B received: task3
+2024-05-20 14:00:58 - Process B processed and sent: gnfx3
+2024-05-20 14:00:58 - Main Process received: gnfx3
+2024-05-20 14:00:58 - Main Process sent: TASK4
+2024-05-20 14:00:58 - Process A received: TASK4
+2024-05-20 14:01:03 - Process A processed and sent: task4
+2024-05-20 14:01:03 - Process B received: task4
+2024-05-20 14:01:03 - Process B processed and sent: gnfx4
+2024-05-20 14:01:03 - Main Process received: gnfx4
+2024-05-20 14:01:05 - Main Process sent: STOP
+2024-05-20 14:01:05 - Process A received: STOP
+2024-05-20 14:01:05 - Process B received: STOP

@@ -1,57 +1,77 @@
-from multiprocessing import Process, Queue, Pipe
+import multiprocessing
 import time
 import codecs
+from multiprocessing import Queue, Process
 
 
-def process_a(queue_from_main, queue_to_b):
+def process_a(input_queue, output_queue):
     while True:
-        msg = queue_from_main.get()  # Сообщения от процесса A
-        if msg == "exit":
-            queue_to_b.put(msg)
+        message = input_queue.get()
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+        with open('interaction_log.txt', 'a') as log_file:
+            log_file.write(f"{timestamp} - Process A received: {message}\n")
+        if message == "STOP":
+            output_queue.put("STOP")
             break
-        msg_lower = msg.lower()  # Сообщения в нижний регистр
+        lower_message = message.lower()
         time.sleep(5)
-        queue_to_b.put(msg_lower)  # Сообщения в процесс B
+        output_queue.put(lower_message)
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+        with open('interaction_log.txt', 'a') as log_file:
+            log_file.write(
+                f"{timestamp} - Process A processed and sent: {lower_message}\n")
 
 
-def process_b(queue_from_a, conn_to_main):
+def process_b(input_queue, output_queue):
     while True:
-        msg = queue_from_a.get()
-        if msg == "exit":
+        message = input_queue.get()
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+        with open('interaction_log.txt', 'a') as log_file:
+            log_file.write(f"{timestamp} - Process B received: {message}\n")
+        if message == "STOP":
             break
-        msg_rot13 = codecs.encode(msg, 'rot_13')  # Применение ROT13
-        conn_to_main.send(msg_rot13)  # Сообщения обратно в процесс
-
-
-def log_interaction(message):
-    with open("artifacts/4_3.txt", "a") as log_file:
-        current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-        log_file.write(f"[{current_time}] {message}\n")
+        rot13_message = codecs.encode(message, 'rot_13')
+        print(f"{timestamp} - Process B: {rot13_message}")
+        output_queue.put(rot13_message)
+        with open('interaction_log.txt', 'a') as log_file:
+            log_file.write(
+                f"{timestamp} - Process B processed and sent: {rot13_message}\n")
 
 
 if __name__ == "__main__":
-    # Очередь для сообщений
-    queue_main_to_a = Queue()
-    queue_a_to_b = Queue()
-    parent_conn, child_conn = Pipe()
+    input_queue_a = Queue()
+    queue_ab = Queue()
+    queue_b_main = Queue()
 
-    p_a = Process(target=process_a, args=(queue_main_to_a, queue_a_to_b))
-    p_b = Process(target=process_b, args=(queue_a_to_b, child_conn))
-    p_a.start()
-    p_b.start()
+    process_a_instance = Process(
+        target=process_a, args=(input_queue_a, queue_ab))
+    process_b_instance = Process(
+        target=process_b, args=(queue_ab, queue_b_main))
 
-    try:
-        while True:
-            user_input = input("Введите 'exit' для выхода: ")
+    process_a_instance.start()
+    process_b_instance.start()
 
-            log_interaction(f"Отправлено: {user_input}")          # Логирование
-            queue_main_to_a.put(user_input)
-            if user_input == "exit":
-                break
-            received_msg = parent_conn.recv()
-            log_interaction(f"Получено: {received_msg}")
-            print(f"Обработанное сообщение: {received_msg}")
-    finally:
-        p_a.join()
-        p_b.join()
-        print("Завершение")
+    print("Type your messages. Type 'STOP' to end.")
+
+    with open('interaction_log.txt', 'w') as log_file:
+        log_file.write("Interaction Log\n")
+        log_file.write("================\n")
+
+    while True:
+        user_input = input()
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+        input_queue_a.put(user_input)
+        with open('interaction_log.txt', 'a') as log_file:
+            log_file.write(f"{timestamp} - Main Process sent: {user_input}\n")
+        if user_input == "STOP":
+            break
+
+        response = queue_b_main.get()
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+        print(f"{timestamp} - Main Process received: {response}")
+        with open('artifacts/4_3.txt', 'a') as log_file:
+            log_file.write(
+                f"{timestamp} - Main Process received: {response}\n")
+
+    process_a_instance.join()
+    process_b_instance.join()
