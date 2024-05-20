@@ -1,53 +1,73 @@
 import math
-import concurrent.futures
 import time
 import logging
-import os
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 # Настройка логирования
-logging.basicConfig(filename='artifacts/4_2.log',
-                    level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(filename='artifacts/4_2.log', level=logging.INFO,
+                    format='%(asctime)s - %(message)s')
 
 
-def integrate(f, a, b, *, n_jobs=1, n_iter=10000000):
+def integrate_part(f, start, end, step):
+    acc = 0
+    x = start
+    while x < end:
+        acc += f(x) * step
+        x += step
+    return acc
+
+
+def integrate(f, a, b, *, n_jobs=1, n_iter=10000000, executor_class=ThreadPoolExecutor):
     step = (b - a) / n_iter
-    total_sum = 0
-    part_iter = n_iter // n_jobs
+    part_size = n_iter // n_jobs
     futures = []
 
-    def integrate_part(start, end):
-        acc = 0
-        for i in range(start, end):
-            acc += f(a + i * step) * step
-        return acc
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=n_jobs) as executor:
+    with executor_class(max_workers=n_jobs) as executor:
         for i in range(n_jobs):
-            start = i * part_iter
-            end = start + part_iter if i < n_jobs - 1 else n_iter
-            futures.append(executor.submit(integrate_part, start, end))
-            logging.info(f'Task {i+1} started.')
+            start = a + i * part_size * step
+            end = start + part_size * step
+            logging.info(f"Запуск задачи {i+1} для диапазона ({start}, {end})")
+            futures.append(executor.submit(
+                integrate_part, f, start, end, step))
 
-    for future in concurrent.futures.as_completed(futures):
-        total_sum += future.result()
+        result = sum(f.result() for f in futures)
 
-    return total_sum
-
-
-def run_experiments():
-    cpu_count = os.cpu_count() or 1
-    for executor_class in [concurrent.futures.ThreadPoolExecutor, concurrent.futures.ProcessPoolExecutor]:
-        with open(f'artifacts//comparison_{executor_class.__name__}.txt', 'w') as file:
-            for n_jobs in range(1, cpu_count * 2 + 1):
-                start_time = time.time()
-                result = integrate(math.cos, 0, math.pi / 2, n_jobs=n_jobs)
-                elapsed_time = time.time() - start_time
-                logging.info(
-                    f'{executor_class.__name__} - n_jobs: {n_jobs}, Time: {elapsed_time}, Result: {result}')
-                file.write(f'n_jobs: {n_jobs}, Time: {elapsed_time}s\n')
+    return result
 
 
-if __name__ == "__main__":
-    run_experiments()
+def measure_time_and_log(n_jobs, executor_class):
+    start_time = time.time()
+    result = integrate(math.cos, 0, math.pi / 2,
+                       n_jobs=n_jobs, executor_class=executor_class)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logging.info(f"{executor_class.__name__} с {n_jobs} воркерами завершен за {
+                 elapsed_time:.2f} секунд. Результат: {result}")
+    return elapsed_time
+
+
+if __name__ == '__main__':
+    import multiprocessing
+
+    cpu_count = multiprocessing.cpu_count()
+    n_jobs_list = range(1, cpu_count * 2 + 1)
+
+    thread_times = []
+    process_times = []
+
+    for n_jobs in n_jobs_list:
+        thread_time = measure_time_and_log(n_jobs, ThreadPoolExecutor)
+        thread_times.append((n_jobs, thread_time))
+        process_time = measure_time_and_log(n_jobs, ProcessPoolExecutor)
+        process_times.append((n_jobs, process_time))
+
+    with open('artifacts/comparison.txt', 'w') as file:
+        file.write("ThreadPoolExecutor times:\n")
+        for n_jobs, time in thread_times:
+            file.write(f"{n_jobs} workers: {time:.2f} seconds\n")
+
+        file.write("\nProcessPoolExecutor times:\n")
+        for n_jobs, time in process_times:
+            file.write(f"{n_jobs} workers: {time:.2f} seconds\n")
+
+    print("Результаты записаны в comparison.txt")
